@@ -1,0 +1,115 @@
+#pragma once
+
+#include <iostream>
+#include <fstream>
+#include <set>
+#include <sstream>
+#include <direct.h>
+#include <io.h>
+
+#include <cqcppsdk/cqcppsdk.h>
+#include "json.hpp"
+
+#ifndef HEADERS
+
+using json = nlohmann::json;
+
+using cq::utils::ansi;
+
+using namespace cq;
+using namespace std;
+using Message = cq::message::Message;
+using MessageSegment = cq::message::MessageSegment;
+
+#define HEADERS
+
+#else
+
+#define HEADERS extern
+
+#endif
+
+#include "datagenerator.hpp"
+#include "register.hpp"
+#include "stringsplit.hpp"
+
+CQ_INIT {
+    on_enable([] { 
+        logging::info("启用", "公主连结黄历已启用");
+        Generate();
+    });
+
+    on_group_message([](const GroupMessageEvent &event) {
+        vector<string> groups;
+        try { //读取可用群
+            ifstream ifile(ansi(dir::app()+"groups.txt"));
+            string string_groups;
+            ifile>>string_groups;
+            ifile.close();
+            groups=stringSplit(string_groups,",");
+        } catch (ApiError &err) {
+            logging::warning("加载数据","读取可用群失败！错误码："+to_string(err.code));
+        }
+        bool ENABLED=0;
+        for(auto group:groups)if(group==to_string(event.group_id)) {ENABLED=1;break;}
+        if (ENABLED == 0) return; // 不在启用的群中, 忽略
+        
+        string command="签到";
+
+        if(event.message!=command)return; //不触发指令
+
+        tm *t;
+        int lastyear,nowyear,lastmonth,nowmonth,lastday,nowday;
+        json data;
+
+        try { //读取签到数据
+            ifstream jsonFile(ansi(dir::app()+"groups\\"+to_string(event.group_id)+".json"));
+            data=json::parse(jsonFile);
+            json user=data[to_string(event.user_id)];
+            time_t lastt=user["lasttime"].get<time_t>(),nowt=time(NULL);
+            t=localtime(&lastt);
+            lastyear=t->tm_year,lastmonth=t->tm_mon,lastday=t->tm_mday;
+            t=localtime(&nowt);
+            nowyear=t->tm_year,nowmonth=t->tm_mon,nowday=t->tm_mday;
+        } catch (ApiError &err) {
+            logging::warning("加载数据","读取可用群失败！错误码："+to_string(err.code));
+            return;
+        } catch (nlohmann::detail::parse_error &err) { //json不存在
+            logging::info("加载数据","json数据不存在，重新创建");
+            mkdir(ansi(dir::app()+"groups\\").c_str());
+            ofstream os(ansi(dir::app()+"groups\\"+to_string(event.group_id)+".json"));
+            data["readme"]="Do not modify this file unless you know what you're doing!"; //readme
+            os << data.dump(4) << endl;
+            os.close();
+            time_t lastt=1000000000,nowt=time(NULL);
+            t=localtime(&lastt);
+            lastyear=t->tm_year,lastmonth=t->tm_mon,lastday=t->tm_mday;
+            t=localtime(&nowt);
+            nowyear=t->tm_year,nowmonth=t->tm_mon,nowday=t->tm_mday;
+        } catch (nlohmann::detail::type_error &err) { //json没有用户签到数据
+            logging::info("加载数据","json数据不存在");
+            time_t lastt=1000000000,nowt=time(NULL);
+            t=localtime(&lastt);
+            lastyear=t->tm_year,lastmonth=t->tm_mon,lastday=t->tm_mday;
+            t=localtime(&nowt);
+            nowyear=t->tm_year,nowmonth=t->tm_mon,nowday=t->tm_mday;
+        }
+
+        try {
+            if(lastyear==nowyear && lastmonth==nowmonth && lastday==nowday) { //今天已经签过到了
+                send_group_message(event.group_id,MessageSegment::at(event.user_id)+"您今天已经签过到啦！");
+                logging::info("签到",to_string(event.user_id)+"重复签到");
+            } else {
+                if(Register(event.group_id,event.user_id)) {
+                    ofstream os(ansi(dir::app()+"groups\\"+to_string(event.group_id)+".json"));
+                    json user;
+                    user["lasttime"]=time(NULL);
+                    data[to_string(event.user_id)]=user;
+                    os << data.dump(4) << endl;
+                    os.close();
+                }
+                logging::info("签到",to_string(event.user_id)+"成功签到");
+            }
+        } catch (ApiError &err) {} //忽略错误
+    });
+}
