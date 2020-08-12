@@ -45,8 +45,14 @@ bool Register(const int64_t &group_id,const int64_t &user_id,json &result) {
     try {
         json fortune=jsonfile["fortune"];
         int id=rand()%fortune.size();
-        response+=MessageSegment::at(user_id)+"签到成功！\n今日运势："+fortune[id].get<string>()+"\n";
-        result["fortune"]=fortune[id];
+        if(fortune[id].get<string>()=="大吉"||fortune[id].get<string>()=="大凶"&&rand()%2) { //下调概率
+            id=rand()%fortune.size();
+            response+=MessageSegment::at(user_id)+"签到成功！\n今日运势："+fortune[id].get<string>()+"\n";
+            result["fortune"]=fortune[id];
+        } else {
+            response+=MessageSegment::at(user_id)+"签到成功！\n今日运势："+fortune[id].get<string>()+"\n";
+            result["fortune"]=fortune[id];
+        }
     } catch (nlohmann::detail::type_error &err) { //不存在fortune键值
         logging::warning("加载数据","读取应用数据失败，请data.json是否存在fortune项！");
         return false;
@@ -66,39 +72,51 @@ bool Register(const int64_t &group_id,const int64_t &user_id,json &result) {
         return false;
     }
 
-    int suitid;
-    try {
-        json suitable=jsonfile["suitable"];
-        suitid=rand()%suitable.size();
-        int id=suitid;
-        for(json::iterator it = suitable.begin(); it != suitable.end(); ++it) {
-            if(id==0) {
-                response+="宜："+it.key()+"："+it.value().get<string>()+"\n";
-                result["suitable"] = {it.key(),it.value()};
-                break;
+    if(result["fortune"].get<string>()=="大吉") {
+        response+="宜：诸事皆宜\n";
+        response+="忌：诸事皆宜\n";
+        result["suitable"] = {"诸事皆宜",""};
+        result["unsuitable"] = {"诸事皆宜",""};
+    } else if(result["fortune"].get<string>()=="大凶") {
+        response+="宜：诸事不宜\n";
+        response+="忌：诸事不宜\n";
+        result["suitable"] = {"诸事不宜",""};
+        result["unsuitable"] = {"诸事不宜",""};
+    } else {
+        int suitid;
+        try {
+            json suitable=jsonfile["suitable"];
+            suitid=rand()%suitable.size();
+            int id=suitid;
+            for(json::iterator it = suitable.begin(); it != suitable.end(); ++it) {
+                if(id==0) {
+                    response+="宜："+it.key()+"："+it.value().get<string>()+"\n";
+                    result["suitable"] = {it.key(),it.value()};
+                    break;
+                }
+                id--;
             }
-            id--;
+        } catch (nlohmann::detail::type_error &err) { //不存在suitable键值
+            logging::warning("加载数据","读取应用数据失败，请data.json是否存在suitable项！");
+            return false;
         }
-    } catch (nlohmann::detail::type_error &err) { //不存在suitable键值
-        logging::warning("加载数据","读取应用数据失败，请data.json是否存在suitable项！");
-        return false;
-    }
 
-    try {
-        json unsuitable=jsonfile["unsuitable"];
-        int id=rand()%unsuitable.size();
-        if(id==suitid)id=(id+1)%unsuitable.size();
-        for(json::iterator it = unsuitable.begin(); it != unsuitable.end(); ++it) {
-            if(id==0) {
-                response+="忌："+it.key()+"："+it.value().get<string>()+"\n";
-                result["unsuitable"] = {it.key(),it.value()};
-                break;
+        try {
+            json unsuitable=jsonfile["unsuitable"];
+            int id=rand()%unsuitable.size();
+            if(id==suitid)id=(id+1)%unsuitable.size();
+            for(json::iterator it = unsuitable.begin(); it != unsuitable.end(); ++it) {
+                if(id==0) {
+                    response+="忌："+it.key()+"："+it.value().get<string>()+"\n";
+                    result["unsuitable"] = {it.key(),it.value()};
+                    break;
+                }
+                id--;
             }
-            id--;
+        } catch (nlohmann::detail::type_error &err) { //不存在unsuitable键值
+            logging::warning("加载数据","读取应用数据失败，请data.json是否存在unsuitable项！");
+            return false;
         }
-    } catch (nlohmann::detail::type_error &err) { //不存在unsuitable键值
-        logging::warning("加载数据","读取应用数据失败，请data.json是否存在unsuitable项！");
-        return false;
     }
 
     int h=rand()%24,m=rand()%60,s=rand()%60;

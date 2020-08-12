@@ -63,7 +63,7 @@ bool QueryData(const int64_t &group_id,const int64_t &user_id) {
         Message response;
 
         try {
-            response+=MessageSegment::at(user_id)+"今日运势："+user["fortune"].get<string>()+"\n";
+            response+=MessageSegment::at(user_id)+"\n今日运势："+user["fortune"].get<string>()+"\n";
         } catch (nlohmann::detail::type_error &err) { //不存在fortune键值
             logging::warning("加载数据","未检测到fortune键值！");
             return false;
@@ -77,14 +77,22 @@ bool QueryData(const int64_t &group_id,const int64_t &user_id) {
         }
 
         try {
-            response+="宜："+user["suitable"][0].get<string>()+"："+user["suitable"][1].get<string>()+"\n";
+            if(user["suitable"].size()>1&&user["suitable"][1].get<string>()!="") {
+                response+="宜："+user["suitable"][0].get<string>()+"："+user["suitable"][1].get<string>()+"\n";
+            } else {
+                response+="宜："+user["suitable"][0].get<string>()+"\n";
+            }
         } catch (nlohmann::detail::type_error &err) { //不存在suitable键值
             logging::warning("加载数据","未检测到suitable键值！");
             return false;
         }
 
         try {
-            response+="忌："+user["unsuitable"][0].get<string>()+"："+user["unsuitable"][1].get<string>()+"\n";
+            if(user["unsuitable"].size()>1&&user["unsuitable"][1].get<string>()!="") {
+                response+="忌："+user["unsuitable"][0].get<string>()+"："+user["unsuitable"][1].get<string>()+"\n";
+            } else {
+                response+="忌："+user["unsuitable"][0].get<string>()+"\n";
+            }
         } catch (nlohmann::detail::type_error &err) { //不存在unsuitable键值
             logging::warning("加载数据","未检测到unsuitable键值！");
             return false;
