@@ -13,7 +13,7 @@
 1. 将app放入CoolQ/app/文件夹（使用Mirai请参考Mirai-Native配置方法）
 2. 重新载入应用
 3. 启用本应用（打开config.yml并将"enable"项改为"true"）
-4. 打开config.yml并在"groups"项输入启用群号，使用','进行分割
+4. 打开`config.yml`并在"groups"项输入启用群号，使用','进行分割
 5. 恭喜，插件可以正常运行啦！
 
 ```diff
@@ -24,8 +24,8 @@
 ```
 
 ## 扩展设置
-本插件的数据均均匀随机生成自应用目录中的data.json  
-插件在第一次启用时会自动生成默认data.json  
+本插件的数据均均匀随机生成自应用目录中的`data.json`（大凶和大吉需要进行二次鉴定，并有独特的宜忌事件说明）  
+插件在第一次启用时会自动生成默认`data.json`  
 
 该json的架构大致如下：
 - `"fortune": ["大吉",...]  //用于生成运势`
@@ -37,9 +37,16 @@
 
 可以任意按照json格式添加数据来增加对应事件  
 
+在`config.yml`中可以通过修改`command`项从而编辑命令
+```yml
+command:
+  register: 签到
+  query: 运势
+```
+
 **注意：**
 1. 请尽量保持本插件运行环境内所有文件为UTF-8编码
-2. 请保证键值对"suitable"与"unsuitable"的键顺序相同
+2. 请保证键值对`suitable`与`unsuitable`的键顺序相同
 
 ## 插件构建
 本插件依赖于[cqcppsdk](https://cqcppsdk.cqp.moe/)，请先了解SDK的相关知识  
