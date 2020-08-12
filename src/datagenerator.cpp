@@ -91,6 +91,8 @@ bool Generate() {
         node config;
         config["enable"]="false";
         config["groups"]="0";
+        config["command"]["register"]="签到";
+        config["command"]["query"]="运势";
         ofstream osy(yml);
         osy<<config;
         osy.close();
