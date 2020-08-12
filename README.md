@@ -1,5 +1,7 @@
 # 公主连结黄历
 
+当前版本号：pcrcalendar 1.0.2
+
 ## 联系方式
 [QQ群 735209171](https://jq.qq.com/?_wv=1027&k=5cV7uEJ)  
 ~~[酷Q帖子](https://cqp.cc/t/51730)~~  
@@ -12,8 +14,8 @@
 ~~由于本插件尚未加入GUI，所以~~请在应用目录（CoolQ/data/app/com.billyang.calendar/）内进行应用配置：  
 1. 将app放入CoolQ/app/文件夹（使用Mirai请参考Mirai-Native配置方法）
 2. 重新载入应用
-3. 启用本应用（打开config.yml并将"enable"项改为"true"）
-4. 打开`config.yml`并在"groups"项输入启用群号，使用','进行分割
+3. 启用本应用（打开`config.yml`并将`enable`项改为`true`）
+4. 打开`config.yml`并在`groups`项输入启用群号，使用','进行分割
 5. 恭喜，插件可以正常运行啦！
 
 ```diff
