@@ -8,6 +8,7 @@
 #include <io.h>
 
 #include <cqcppsdk/cqcppsdk.h>
+#include <yaml-cpp/yaml.h>
 #include "json.hpp"
 
 #ifndef HEADERS

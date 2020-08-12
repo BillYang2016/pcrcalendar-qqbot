@@ -8,6 +8,7 @@
 #include <io.h>
 
 #include <cqcppsdk/cqcppsdk.h>
+#include <yaml-cpp/yaml.h>
 #include "json.hpp"
 
 #ifndef HEADERS
@@ -26,7 +27,7 @@ using MessageSegment = cq::message::MessageSegment;
 #endif
 
 bool Generate() {
-    if(access(ansi(dir::app()+"data.json").c_str(),0)!=0) {
+    if(_access(ansi(dir::app()+"data.json").c_str(),0)!=0) {
         try {
             string data = ansi(dir::app()+"data.json");
             json fortune = {"大吉","中吉","小吉","大凶","凶","小凶"};
@@ -85,13 +86,13 @@ bool Generate() {
     }
 
     string group = ansi(dir::app()+"groups.txt");
-    if(access(group.c_str(),0)!=0) {
+    if(_access(group.c_str(),0)!=0) {
         ofstream osg(group);
         osg.close();
     }
 
     string rdm = ansi(dir::app()+"readme.md");
-    if(access(rdm.c_str(),0)!=0) {
+    if(_access(rdm.c_str(),0)!=0) {
         ofstream osr(rdm);
         osr<<"## Modify \"groups.txt\" to enable plugin for groups, use ',' as split pattern  \n"<<
         "## 修改\"groups.txt\"用于启用本插件对应群，用','分割  \n\n"<<
