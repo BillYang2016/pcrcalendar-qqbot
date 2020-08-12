@@ -106,9 +106,10 @@ CQ_INIT {
                 send_group_message(event.group_id,MessageSegment::at(event.user_id)+"您今天已经签过到啦！");
                 logging::info("签到",to_string(event.user_id)+"重复签到");
             } else {
-                if(Register(event.group_id,event.user_id)) {
+                json result;
+                if(Register(event.group_id,event.user_id,result)) {
                     ofstream os(ansi(dir::app()+"groups\\"+to_string(event.group_id)+".json"));
-                    json user;
+                    json user=result;
                     user["lasttime"]=time(NULL);
                     data[to_string(event.user_id)]=user;
                     os << data.dump(4) << endl;

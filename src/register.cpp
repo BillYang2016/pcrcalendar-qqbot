@@ -27,7 +27,7 @@ using MessageSegment = cq::message::MessageSegment;
 
 #endif
 
-bool Register(const int &group_id,const int &user_id) {
+bool Register(const int64_t &group_id,const int64_t &user_id,json &result) {
     json jsonfile;
     try { //读取数据
         ifstream jsonFile(ansi(dir::app()+"data.json"));
@@ -46,6 +46,7 @@ bool Register(const int &group_id,const int &user_id) {
         json fortune=jsonfile["fortune"];
         int id=rand()%fortune.size();
         response+=MessageSegment::at(user_id)+"签到成功！\n今日运势："+fortune[id].get<string>()+"\n";
+        result["fortune"]=fortune[id];
     } catch (nlohmann::detail::type_error &err) { //不存在fortune键值
         logging::warning("加载数据","读取应用数据失败，请data.json是否存在fortune项！");
         return false;
@@ -59,6 +60,7 @@ bool Register(const int &group_id,const int &user_id) {
         json characters=jsonfile["characters"];
         int id=rand()%characters.size();
         response+="今日幸运角色："+characters[id].get<string>()+"\n";
+        result["characters"]=characters[id];
     } catch (nlohmann::detail::type_error &err) { //不存在characters键值
         logging::warning("加载数据","读取应用数据失败，请data.json是否存在characters项！");
         return false;
@@ -72,6 +74,7 @@ bool Register(const int &group_id,const int &user_id) {
         for(json::iterator it = suitable.begin(); it != suitable.end(); ++it) {
             if(id==0) {
                 response+="宜："+it.key()+"："+it.value().get<string>()+"\n";
+                result["suitable"] = {it.key(),it.value()};
                 break;
             }
             id--;
@@ -88,6 +91,7 @@ bool Register(const int &group_id,const int &user_id) {
         for(json::iterator it = unsuitable.begin(); it != unsuitable.end(); ++it) {
             if(id==0) {
                 response+="忌："+it.key()+"："+it.value().get<string>()+"\n";
+                result["unsuitable"] = {it.key(),it.value()};
                 break;
             }
             id--;
@@ -99,11 +103,13 @@ bool Register(const int &group_id,const int &user_id) {
 
     int h=rand()%24,m=rand()%60,s=rand()%60;
     response+="抽卡加成时间："+to_string(h)+"时"+to_string(m)+"分"+to_string(s)+"秒\n";
+    result["prefertime"] = to_string(h)+"时"+to_string(m)+"分"+to_string(s)+"秒";
 
     try {
         json position=jsonfile["position"];
         int id=rand()%position.size();
         response+="抽卡加成方向："+position[id].get<string>()+"\n";
+        result["position"]=position[id];
     } catch (nlohmann::detail::type_error &err) { //不存在position键值
         logging::warning("加载数据","读取应用数据失败，请data.json是否存在position项！");
         return false;
@@ -113,6 +119,7 @@ bool Register(const int &group_id,const int &user_id) {
         json actions=jsonfile["actions"];
         int id=rand()%actions.size();
         response+="抽卡加成动作："+actions[id].get<string>()+"\n";
+        result["actions"]=actions[id];
     } catch (nlohmann::detail::type_error &err) { //不存在actions键值
         logging::warning("加载数据","读取应用数据失败，请data.json是否存在actions项！");
         return false;
