@@ -46,7 +46,7 @@ bool QueryData(const int64_t &group_id,const int64_t &user_id) {
         return false;
     } catch (nlohmann::detail::parse_error &err) { //json不存在
         logging::info("加载数据","json数据不存在，重新创建");
-        mkdir(ansi(dir::app()+"groups\\").c_str());
+        _mkdir(ansi(dir::app()+"groups\\").c_str());
         ofstream os(ansi(dir::app()+"groups\\"+to_string(group_id)+".json"));
         data["readme"]="Do not modify this file unless you know what you're doing!"; //readme
         os << data.dump(4) << endl;
