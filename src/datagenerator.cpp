@@ -14,6 +14,7 @@
 #ifndef HEADERS
 
 using json = nlohmann::json;
+using node = YAML::Node;
 
 using cq::utils::ansi;
 
@@ -85,17 +86,21 @@ bool Generate() {
         }
     }
 
-    string group = ansi(dir::app()+"groups.txt");
-    if(_access(group.c_str(),0)!=0) {
-        ofstream osg(group);
-        osg.close();
+    string yml = ansi(dir::app()+"config.yml");
+    if(_access(yml.c_str(),0)!=0) {
+        node config;
+        config["enable"]="false";
+        config["groups"]="0";
+        ofstream osy(yml);
+        osy<<config;
+        osy.close();
     }
 
     string rdm = ansi(dir::app()+"readme.md");
     if(_access(rdm.c_str(),0)!=0) {
         ofstream osr(rdm);
-        osr<<"## Modify \"groups.txt\" to enable plugin for groups, use ',' as split pattern  \n"<<
-        "## 修改\"groups.txt\"用于启用本插件对应群，用','分割  \n\n"<<
+        osr<<"## Modify \"groups\" item in the \"config.yml\" to enable plugin for groups, use ',' as split pattern  \n"<<
+        "## 修改\"config.yml\"中的\"groups\"项用于启用本插件对应群，用','分割  \n\n"<<
         "## Modify \"data.json\" to get multible responses  \n"<<
         "## 修改\"data.json\"来获得不同的消息响应  \n"<<
         "## 'suitable' keys should have the same order with 'unsuitable' keys  \n"<<

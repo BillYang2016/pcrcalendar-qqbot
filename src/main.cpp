@@ -14,6 +14,7 @@
 #ifndef HEADERS
 
 using json = nlohmann::json;
+using node = YAML::Node;
 
 using cq::utils::ansi;
 
@@ -41,16 +42,20 @@ CQ_INIT {
     });
 
     on_group_message([](const GroupMessageEvent &event) {
+        string yml = ansi(dir::app()+"config.yml");
+        node config;
+
         vector<string> groups;
-        try { //读取可用群
-            ifstream ifile(ansi(dir::app()+"groups.txt"));
-            string string_groups;
-            ifile>>string_groups;
-            ifile.close();
+        try { //读取配置
+            config = YAML::LoadFile(yml);
+            string string_groups=config["groups"].as<string>();
             groups=stringSplit(string_groups,",");
         } catch (ApiError &err) {
             logging::warning("加载数据","读取可用群失败！错误码："+to_string(err.code));
         }
+
+        if(config["enable"].as<string>()!="true")return; //插件未启用
+        
         bool ENABLED=0;
         for(auto group:groups)if(group==to_string(event.group_id)) {ENABLED=1;break;}
         if (ENABLED == 0) return; // 不在启用的群中, 忽略

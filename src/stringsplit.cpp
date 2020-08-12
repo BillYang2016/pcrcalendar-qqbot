@@ -14,6 +14,7 @@
 #ifndef HEADERS
 
 using json = nlohmann::json;
+using node = YAML::Node;
 
 using cq::utils::ansi;
 

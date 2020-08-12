@@ -8,11 +8,13 @@
 #include <io.h>
 
 #include <cqcppsdk/cqcppsdk.h>
+#include <yaml-cpp/yaml.h>
 #include "json.hpp"
 
 #ifndef HEADERS
 
 using json = nlohmann::json;
+using node = YAML::Node;
 
 using cq::utils::ansi;
 

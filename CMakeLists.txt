@@ -23,8 +23,10 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp) # 递归搜索 src 目录中的源文�
 
 if (CQ_CAN_BUILD_STD_MODE)
     cq_add_std_app(${SOURCE_FILES}) # 添加 std 模式的动态链接库构建目标
+    target_link_libraries(app yaml-cpp)
     cq_install_std_app()
 endif ()
 
 # 添加 dev 模式的可执行文件构建目标
 cq_add_dev_app(${SOURCE_FILES})
+target_link_libraries(app_dev yaml-cpp)
